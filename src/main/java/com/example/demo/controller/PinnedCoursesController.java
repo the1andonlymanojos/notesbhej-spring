@@ -80,7 +80,9 @@ public class PinnedCoursesController {
         long start = System.nanoTime();
         PinnedCourses pinnedCourses = repo.findById(id)
                 .orElseThrow();
-        if(pinnedCourses.getUser()!=user) throw new BadRequestException("you aint the user!");
+        System.out.println("USER: "+user.getId());
+        System.out.println("USER pinned: "+pinnedCourses.getUser().getId());
+        if(!pinnedCourses.getUser().getId().equals(user.getId())) throw new BadRequestException("you aint the user!");
         repo.deleteById(id);
     }
 }
