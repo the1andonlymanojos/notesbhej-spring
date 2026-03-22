@@ -75,8 +75,8 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }
         System.out.println("redirect param = " + redirect);
 
-        String frontend = "https://notesspring.mshiv.net";
-
+        String frontend = "https://notesbhej.mshiv.net";
+        //String frontend = "https://localhost:3000";
         if (redirect == null) {
             redirect = frontend;
         }
