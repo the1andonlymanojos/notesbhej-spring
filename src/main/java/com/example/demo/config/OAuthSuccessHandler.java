@@ -62,7 +62,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // true later
         cookie.setPath("/");
-        cookie.setMaxAge(3600);
+        cookie.setMaxAge(3600*30*24);
 
         String redirect = null;
 
