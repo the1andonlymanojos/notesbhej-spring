@@ -14,8 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.UUID;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 @Component
-@Order(2)
+@Order(102)
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RequestLoggingFilter.class);
@@ -33,14 +35,23 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         } finally {
             long duration = System.currentTimeMillis() - start;
 
-            log.info("{} {} -> {} ({} ms)",
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    response.getStatus(),
-                    duration);
+            String method = request.getMethod();
+            String path = request.getRequestURI();
+            int status = response.getStatus();
+
+            String ip = MDC.get("ip");     // from your earlier filter
+            String user = MDC.get("user"); // from auth filter
+
+            log.info("request",
+                    kv("method", method),
+                    kv("path", path),
+                    kv("status", status),
+                    kv("duration_ms", duration),
+                    kv("ip", ip),
+                    kv("user", user)
+            );
         }
     }
 }
-
 
 
