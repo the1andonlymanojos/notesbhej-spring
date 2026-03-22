@@ -48,7 +48,12 @@ WHERE c.course.id = :courseId
             Long professorId
     );
 
-
+    @Query("""
+SELECT cc FROM CourseContent cc
+LEFT JOIN FETCH cc.tags
+WHERE cc.course.id = :courseId
+ORDER BY cc.orderIndex ASC
+""")
     List<CourseContent> findAllByCourse_IdOrderByOrderIndexAsc(Long courseId);
 
     //List<CourseContent> findAllByCourse_IdAndIsLatestTrueOrderByOrderIndexAsc(Long id);

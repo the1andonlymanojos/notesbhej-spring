@@ -29,24 +29,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("---- incoming request ----");
-        System.out.println("path = " + request.getRequestURI());
-
         Cookie[] cookies = request.getCookies();
 
-        if (cookies == null) {
-            System.out.println("no cookies");
-        } else {
-            for (Cookie c : cookies) {
-                System.out.println(c.getName() + " = " + c.getValue());
-            }
-        }
         String token = null;
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                System.out.println(cookie.getName());
-
                 if ("access_token".equals(cookie.getName())) {
                     token = cookie.getValue();
                     break;
@@ -54,16 +42,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             }
         }
-        System.out.println("tok"+token);
         if (token != null) {
 
             User user = jwtService.validate(token);
 
-            System.out.println("validated user = " + user);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             user, null, user.getAuthorities());
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
