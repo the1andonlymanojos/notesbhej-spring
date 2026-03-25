@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 @Order(100) // after Spring Security
@@ -25,8 +26,15 @@ public class UserMdcFilter extends OncePerRequestFilter {
 
         try {
             var auth = SecurityContextHolder.getContext().getAuthentication();
+
             if (auth != null && auth.isAuthenticated()) {
-                MDC.put("user", ((User)auth.getPrincipal()).getFullName());
+                Object principal = auth.getPrincipal();
+
+                if (principal instanceof User user) {
+                    MDC.put("user", user.getFullName());
+                } else {
+                    MDC.put("user", "anonymous");
+                }
             } else {
                 MDC.put("user", "anon");
             }
