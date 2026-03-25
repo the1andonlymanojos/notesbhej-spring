@@ -1,5 +1,6 @@
 package com.example.demo.logging;
 
+import com.example.demo.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ public class UserMdcFilter extends OncePerRequestFilter {
         try {
             var auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.isAuthenticated()) {
-                MDC.put("user", auth.getName());
+                MDC.put("user", ((User)auth.getPrincipal()).getFullName());
             } else {
                 MDC.put("user", "anon");
             }
