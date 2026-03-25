@@ -30,13 +30,14 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
         long start = System.currentTimeMillis();
 
+        String method = request.getMethod();
+        String path = request.getRequestURI();
+        System.out.println("REQUEST START " + method + " " + path);
         try {
             filterChain.doFilter(request, response);
         } finally {
             long duration = System.currentTimeMillis() - start;
 
-            String method = request.getMethod();
-            String path = request.getRequestURI();
             int status = response.getStatus();
 
             String ip = MDC.get("ip");     // from your earlier filter
