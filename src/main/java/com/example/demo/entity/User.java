@@ -65,6 +65,7 @@ public class User implements UserDetails {
         user.setUserId(UUID.randomUUID());
 
         user.setCreatedAt(Instant.now());
+        user.setAdminRequest(false);
 
         return user;
     }

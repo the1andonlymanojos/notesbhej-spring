@@ -37,3 +37,9 @@ build/
 bin/
 include/
 lib/
+
+.DS_Store
+.m2/
+docker-compose.yml
+logs/
+src/main/resources/
