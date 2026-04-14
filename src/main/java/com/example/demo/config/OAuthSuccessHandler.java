@@ -35,6 +35,11 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
         String email = oauthUser.getAttribute("email");
         String googleId = oauthUser.getAttribute("sub");
+        String hd = oauthUser.getAttribute("hd");
+        System.out.println("HD"+ hd);
+        System.out.println("email: "+email);
+        String frontend = "https://notesbhej.mshiv.net";
+        //String frontend = "http://localhost:3000";
 
         User user = userRepo.findByGoogleId(googleId)
                 .orElseGet(() -> {
@@ -55,6 +60,9 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
                     return userRepo.save(User.fromGoogle(oauthUser));
                 });
 
+        if (user==null){
+            return;
+        }
         String token = jwtService.generateToken(user);
 
         System.out.println("token"+token);
