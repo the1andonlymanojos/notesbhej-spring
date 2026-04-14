@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -20,11 +21,16 @@ public class SecurityConfig {
     private final OAuthRedirectCaptureFilter redirectFilter;
 
 
+    private final ClientRegistrationRepository clientRegistrationRepository;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
-                          OAuthSuccessHandler successHandler, OAuthRedirectCaptureFilter redirectFilter) {
+                          OAuthSuccessHandler successHandler,
+                          OAuthRedirectCaptureFilter redirectFilter,
+                          ClientRegistrationRepository clientRegistrationRepository) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.successHandler = successHandler;
         this.redirectFilter = redirectFilter;
+        this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
     @Bean
@@ -38,6 +44,11 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(auth -> auth
+                                .authorizationRequestResolver(
+                                        new CustomOAuth2AuthorizationRequestResolver(clientRegistrationRepository)
+                                )
+                        )
                         .successHandler(successHandler)
                 )
                 .exceptionHandling(e -> e
