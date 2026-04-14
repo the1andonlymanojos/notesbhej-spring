@@ -1,10 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.dto.ProfessorCourseDTO;
-import com.example.demo.entity.Course;
-import com.example.demo.entity.CourseContent;
-import com.example.demo.entity.Professor;
-import com.example.demo.entity.User;
+import com.example.demo.entity.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -55,7 +52,7 @@ WHERE cc.course.id = :courseId
 ORDER BY cc.orderIndex ASC
 """)
     List<CourseContent> findAllByCourse_IdOrderByOrderIndexAsc(Long courseId);
-
+    List<CourseContent> findAllByVisibility(ContentVisibility visibility);
     //List<CourseContent> findAllByCourse_IdAndIsLatestTrueOrderByOrderIndexAsc(Long id);
     List<CourseContent> findAllByUploadedBy(User uploadedBy);
 }

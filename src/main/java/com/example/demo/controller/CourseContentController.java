@@ -231,6 +231,29 @@ public class CourseContentController {
         return repo.save(existing);
     }
 
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public CourseContentResponse getPendingReview(@AuthenticationPrincipal User user) {
+
+        List<CourseContent> entities =
+                repo.findAllByVisibility(ContentVisibility.PENDING_REVIEW);
+
+        List<CourseContentDTO> content = entities.stream()
+                .map(courseContent -> CourseContentMapper.toDTO(courseContent, true))
+                .toList();
+
+        Map<Long, ProfessorDTO> professors = entities.stream()
+                .map(CourseContent::getProfessor)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        Professor::getId,
+                        CourseContentMapper::toProfessorDTO,
+                        (a, b) -> a
+                ));
+
+        return new CourseContentResponse(content, professors);
+    }
+
     @PatchMapping("/{id}/reorder")
     @PreAuthorize("hasRole('ADMIN')")
     public CourseContent reorder(
