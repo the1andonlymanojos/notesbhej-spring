@@ -56,7 +56,21 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
                         return userRepo.save(u);
                     }
 
-                    // brand new user
+                    // brand-new user
+                    if (hd == null || !hd.equals("iiitm.ac.in")) {
+                        System.out.println("USER IS NOT ALLOWED TO CREATE ACCT");
+                        try {
+                            response.sendRedirect(frontend+"/nextlogin?error=unauthorized_domain");
+                        } catch (IOException e) {
+                            System.out.println("EXCEPTION THROWN");
+                            throw new RuntimeException(e);
+                        }
+                        System.out.println("RETURNING NULL");
+
+                        return null; // stop further processing
+                    }
+
+                    // brand-new user
                     return userRepo.save(User.fromGoogle(oauthUser));
                 });
 
@@ -83,9 +97,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }
         System.out.println("redirect param = " + redirect);
 
-        String frontend = "https://notesbhej.mshiv.net";
-        //String frontend = "https://localhost:3000";
-        if (redirect == null) {
+         if (redirect == null) {
             redirect = frontend;
         }
         else if (redirect.startsWith("/")) {
