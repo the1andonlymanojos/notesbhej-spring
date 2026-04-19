@@ -43,3 +43,14 @@ lib/
 docker-compose.yml
 logs/
 src/main/resources/
+
+testDonw.py
+tagDebug.py
+migrateUsers.py
+migrateUserBg.py
+migrateTags.py
+migrateProf.py
+migratePinned.py
+migratecoursecontent.py
+migrateCourse.py
+migrateUploadedBy.py

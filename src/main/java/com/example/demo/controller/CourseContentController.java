@@ -8,6 +8,7 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.repository.CourseContentRepository;
 import com.example.demo.repository.ProfessorRepository;
 import com.example.demo.repository.TagRepository;
+import com.example.demo.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 public class CourseContentController {
 
     private final CourseContentRepository repo;
-
+  //  private final UserRepository userRepository;
     private final ProfessorRepository professorRepository;
     private final TagRepository tagRepository;
 
@@ -38,8 +39,7 @@ public class CourseContentController {
     }
 
     // GET all
-//    @GetMapping
-//    @PreAuthorize("isAuthenticated()")
+//    @GetMapping("/all")
 //    public List<CourseContent> all() {
 //        return repo.findAll();
 //    }
@@ -286,6 +286,11 @@ public class CourseContentController {
 
         item.setOrderIndex(newOrder);
         return repo.save(item);
+    }
+
+    @GetMapping("/leaderboard")
+    public List<LeaderboardDTO> leaderboard() {
+        return repo.getLeaderboard();
     }
 }
 

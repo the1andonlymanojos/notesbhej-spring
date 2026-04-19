@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.dto.LeaderboardDTO;
 import com.example.demo.dto.ProfessorCourseDTO;
 import com.example.demo.entity.*;
 import org.springframework.data.domain.Pageable;
@@ -55,4 +56,19 @@ ORDER BY cc.orderIndex ASC
     List<CourseContent> findAllByVisibility(ContentVisibility visibility);
     //List<CourseContent> findAllByCourse_IdAndIsLatestTrueOrderByOrderIndexAsc(Long id);
     List<CourseContent> findAllByUploadedBy(User uploadedBy);
+
+    @Query("""
+SELECT new com.example.demo.dto.LeaderboardDTO(
+    u.id,
+    u.fullName,
+    COUNT(cc)
+)
+FROM CourseContent cc
+JOIN cc.uploadedBy u
+WHERE cc.visibility = 'VISIBLE'
+  AND (cc.anonUpload IS NULL OR cc.anonUpload = false)
+GROUP BY u.id, u.fullName
+ORDER BY COUNT(cc) DESC
+""")
+    List<LeaderboardDTO> getLeaderboard();
 }
