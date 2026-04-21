@@ -34,7 +34,7 @@ public class S3Service {
                 ? fileName.substring(fileName.lastIndexOf('.') + 1)
                 : "";
 
-        String key = UUID.randomUUID().toString();
+        String key = UUID.randomUUID().toString()+"."+extension;
         if (fileType == null) {
             key = key + "." + extension;
             fileType = URLConnection.guessContentTypeFromName(fileName);
