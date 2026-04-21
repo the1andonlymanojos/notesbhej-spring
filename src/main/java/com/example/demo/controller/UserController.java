@@ -29,6 +29,7 @@ public class UserController {
         public String bgPref;
         public String fullName;
         public String batch;
+        public String pfpURL;
         public Boolean adminRequest;
     }
 
@@ -71,6 +72,9 @@ public class UserController {
         }
         if (updates.fullName != null && !updates.fullName.isBlank()) {
             userDetails.setFullName(updates.fullName);
+        }
+        if(updates.pfpURL!=null && !updates.pfpURL.isBlank()){
+            userDetails.setProfilePictureUrl(updates.pfpURL);
         }
         if (updates.batch != null && !updates.batch.isBlank()) {
             userDetails.setBatch(updates.batch);
