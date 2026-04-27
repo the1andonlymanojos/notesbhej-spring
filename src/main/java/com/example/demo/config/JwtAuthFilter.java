@@ -4,6 +4,7 @@ import com.example.demo.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,6 +53,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     user, null, user.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    // 👇 Ensure demo_id cookie exists
+                    boolean hasDemoId = false;
+
+                    for (Cookie cookie : cookies) {
+                        if ("demo_id".equals(cookie.getName())) {
+                            hasDemoId = true;
+                            break;
+                        }
+                    }
+                    if (!hasDemoId) {
+                        Cookie demoCookie = getDemoCookie(user);
+
+                        response.addCookie(demoCookie);
+                    }
+
+
+
                 } else {
                     clearCookie(response);
                 }
@@ -62,6 +80,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    private static @NonNull Cookie getDemoCookie(User user) {
+        Cookie demoCookie = new Cookie("demo_id", user.getUserId().toString());
+        demoCookie.setPath("/");
+        demoCookie.setHttpOnly(false); // allow JS if needed for demo
+        demoCookie.setSecure(false);   // set true in production (HTTPS)
+        demoCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
+        demoCookie.setDomain(".mshiv.net");
+        return demoCookie;
+    }
+
     private void clearCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("access_token", null);
         cookie.setHttpOnly(true);
