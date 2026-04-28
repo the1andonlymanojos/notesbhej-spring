@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -38,6 +39,35 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public UserResponseDTO me(@AuthenticationPrincipal User user) {
         return new UserResponseDTO(user.getId(),user.getEmail(), user.getFullName(), user.getBatch(), user.getProfilePictureUrl(), user.getBgPref(), user.getRole(), user.getAdminRequest());
+    }
+
+    @GetMapping("/demo")
+    public UserResponseDTO demo(@CookieValue(name = "demo_id", required = false) String demoId) {
+        if (demoId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No demo cookie");
+        }
+
+        UUID userId;
+        try {
+            userId = UUID.fromString(demoId);
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid demo_id");
+        }
+
+        User user = repo.findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return new UserResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getBatch(),
+                user.getProfilePictureUrl(),
+                user.getBgPref(),
+                user.getRole(),
+                user.getAdminRequest()
+        );
+
     }
 
     @GetMapping("/logged-in")

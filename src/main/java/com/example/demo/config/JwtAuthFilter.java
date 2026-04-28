@@ -87,7 +87,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         demoCookie.setHttpOnly(false); // allow JS if needed for demo
         demoCookie.setSecure(false);   // set true in production (HTTPS)
         demoCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
-        demoCookie.setDomain(".mshiv.net");
+        //demoCookie.setDomain(".mshiv.net");
         return demoCookie;
     }
 
