@@ -19,6 +19,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 public class UserController {
 
+
     private final UserRepository repo;
 
     public UserController(UserRepository repo) {
@@ -32,6 +33,13 @@ public class UserController {
         public String batch;
         public String pfpURL;
         public Boolean adminRequest;
+    }
+    @GetMapping("/health")
+    public Object health() {
+        return java.util.Map.of(
+                "status", "UP",
+                "timestamp", java.time.Instant.now().toString()
+        );
     }
 
     // -------- Get current user --------
