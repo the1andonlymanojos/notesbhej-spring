@@ -22,5 +22,7 @@ data:
   APP_USE_DEV: "false"
   APP_BUCKET: notes-stage
   APP_PUBLIC_URL: https://stage-data.mshiv.net
+  KHAAO_DEX_DISCOVERY_DEFAULT_LATITUDE: "26.2025"
+  KHAAO_DEX_DISCOVERY_DEFAULT_LONGITUDE: "78.1746"
   MINIO_ENDPOINT: http://host.docker.internal:9000
   R2_ENDPOINT: https://8125c1d09c1a52e66574d7ccdec40a3c.r2.cloudflarestorage.com
