@@ -24,7 +24,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final UserRepository userRepo;
 
-    @Value("${APP_FRONTEND_URL:https://notesbhej.mshiv.net}")
+    @Value("${app.frontend-url:https://notesbhej.mshiv.net}")
     private String frontend;
 
     public OAuthSuccessHandler(JwtService jwtService, UserRepository userRepo) {

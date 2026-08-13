@@ -23,7 +23,7 @@ public class UserController {
 
     private final UserRepository repo;
 
-    @Value("${APP_ENV:unknown}")
+    @Value("${app.env:unknown}")
     private String environment;
 
     public UserController(UserRepository repo) {

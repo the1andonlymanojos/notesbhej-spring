@@ -17,7 +17,7 @@ public class JwtService {
 
     private final UserRepository repo;
 
-    @Value("${JWT_SECRET:super-secret-key-super-secret-key-super-secret-key}")
+    @Value("${jwt.secret:super-secret-key-super-secret-key-super-secret-key}")
     private String secret;
 
     public JwtService(UserRepository repo) {
