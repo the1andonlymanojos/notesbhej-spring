@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notesbhej-api
+  namespace: notesbhej
+  labels:
+    app.kubernetes.io/name: notesbhej-api
+spec:
+  # cloudflared runs on this Kubernetes host and connects to 127.0.0.1:30080.
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: notesbhej-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 30080
