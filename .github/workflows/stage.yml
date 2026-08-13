@@ -1,0 +1,76 @@
+name: Stage
+
+on:
+  push:
+    branches:
+      - stage
+  workflow_dispatch:
+
+concurrency:
+  group: stage-deployment
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Test
+        run: ./mvnw -B test
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: docker.io/manojthedonut/notesbhej-api:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, linux, notesbhej-stage]
+    environment:
+      name: stage
+      url: https://notesbhej-stage.mshiv.net
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply stage resources
+        run: kubectl apply -k k8s-stage/
+
+      - name: Select built image
+        run: |
+          kubectl -n notesbhej-stage set image \
+            deployment/notesbhej-api-stage \
+            api=docker.io/manojthedonut/notesbhej-api:${GITHUB_SHA}
+
+      - name: Wait for rollout
+        run: |
+          kubectl -n notesbhej-stage rollout status \
+            deployment/notesbhej-api-stage \
+            --timeout=180s
+
+      - name: Smoke test
+        run: |
+          curl --fail-with-body \
+            https://notesbhej-stage.mshiv.net/api/v1/health

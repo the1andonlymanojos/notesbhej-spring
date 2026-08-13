@@ -42,6 +42,7 @@ public class UserController {
     public Object health() {
         return java.util.Map.of(
                 "status", "UP",
+                "service", "notesbhej-api",
                 "environment", environment,
                 "timestamp", java.time.Instant.now().toString()
         );
