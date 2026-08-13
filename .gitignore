@@ -44,6 +44,10 @@ docker-compose.yml
 logs/
 k8s/notesbhej-secrets.yaml
 k8s-stage/secrets.yaml
+test.yml
+.env
+.env.*
+!.env.example
 src/main/resources/
 
 testDonw.py

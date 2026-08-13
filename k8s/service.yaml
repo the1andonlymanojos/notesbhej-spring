@@ -6,7 +6,6 @@ metadata:
   labels:
     app.kubernetes.io/name: notesbhej-api
 spec:
-  # cloudflared runs on this Kubernetes host and connects to 127.0.0.1:30080.
   type: NodePort
   selector:
     app.kubernetes.io/name: notesbhej-api
