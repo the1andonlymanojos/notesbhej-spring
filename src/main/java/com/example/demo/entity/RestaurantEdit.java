@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Entity
 @Table(name = "khaao_restaurant_edits")
@@ -28,6 +29,11 @@ public class RestaurantEdit {
     private Double proposedLatitude;
     private Double proposedLongitude;
     private String proposedCuisine;
+    @ElementCollection
+    @CollectionTable(name = "khaao_restaurant_edit_categories", joinColumns = @JoinColumn(name = "edit_id"))
+    @Column(name = "category")
+    @Enumerated(EnumType.STRING)
+    private Set<RestaurantCategory> proposedCategories;
     @Enumerated(EnumType.STRING)
     private RestaurantPriceCategory proposedPriceCategory;
     private String proposedGooglePlaceId;

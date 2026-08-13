@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +47,7 @@ class KhaaoDexServiceTest {
         });
 
         RestaurantView result = service.submit(new RestaurantSubmissionRequest(
-                " New Place ", "Address", 26.2, 78.17, "Indian", RestaurantPriceCategory.BUDGET, "place-1"), user);
+                " New Place ", "Address", 26.2, 78.17, "Indian", RestaurantPriceCategory.BUDGET, Set.of(RestaurantCategory.CAFE), "place-1"), user);
 
         assertEquals(RestaurantStatus.PENDING, result.status());
         verify(restaurants).save(argThat(r -> r.getStatus() == RestaurantStatus.PENDING && r.getCreatedBy() == user));
@@ -59,7 +60,7 @@ class KhaaoDexServiceTest {
         when(restaurants.findByStatus(RestaurantStatus.ACTIVE)).thenReturn(List.of(restaurant, far));
         when(reviews.findByUserRestaurant_Restaurant_IdAndDeletedFalse(any())).thenReturn(List.of());
 
-        List<RestaurantView> result = service.discover(null, null, null, 26.2025, 78.1746, 1.0, null);
+        List<RestaurantView> result = service.discover(null, null, null, null, 26.2025, 78.1746, 1.0, null);
 
         assertEquals(List.of("Near"), result.stream().map(RestaurantView::name).toList());
         assertNotEquals(RestaurantStatus.PENDING, result.get(0).status());

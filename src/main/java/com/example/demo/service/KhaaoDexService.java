@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class KhaaoDexService {
@@ -45,6 +46,7 @@ public class KhaaoDexService {
         restaurant.setLongitude(request.longitude());
         restaurant.setCuisine(blankToNull(request.cuisine()));
         restaurant.setPriceCategory(request.priceCategory());
+        restaurant.setCategories(request.categories() == null ? Set.of() : Set.copyOf(request.categories()));
         restaurant.setGooglePlaceId(blankToNull(request.googlePlaceId()));
         restaurant.setStatus(RestaurantStatus.PENDING);
         restaurant.setCreatedBy(user);
@@ -53,6 +55,7 @@ public class KhaaoDexService {
 
     @Transactional
     public List<RestaurantView> discover(User user, String cuisine, RestaurantPriceCategory price,
+                                         Set<RestaurantCategory> categories,
                                          Double latitude, Double longitude, Double radiusKm,
                                          Boolean visited) {
         double centerLat = latitude == null ? defaultLatitude : latitude;
@@ -65,6 +68,7 @@ public class KhaaoDexService {
         return restaurants.findByStatus(RestaurantStatus.ACTIVE).stream()
                 .filter(r -> cuisine == null || (r.getCuisine() != null && r.getCuisine().toLowerCase().contains(cuisine.toLowerCase())))
                 .filter(r -> price == null || r.getPriceCategory() == price)
+                .filter(r -> categories == null || categories.isEmpty() || r.getCategories().stream().anyMatch(categories::contains))
                 .filter(r -> radiusKm == null || distanceKm(centerLat, centerLon, r.getLatitude(), r.getLongitude()) <= radiusKm)
                 .filter(r -> visited == null || user != null && relationships.findByUserAndRestaurant(user, r)
                         .map(UserRestaurant::getVisited).orElse(false).equals(visited))
@@ -147,7 +151,7 @@ public class KhaaoDexService {
     public RestaurantEditView submitEdit(Long restaurantId, RestaurantEditRequest request, User user) {
         Restaurant restaurant = activeRestaurant(restaurantId);
         if (request.name() == null && request.address() == null && request.latitude() == null && request.longitude() == null
-                && request.cuisine() == null && request.priceCategory() == null && request.googlePlaceId() == null) {
+                && request.cuisine() == null && request.priceCategory() == null && request.categories() == null && request.googlePlaceId() == null) {
             throw new BadRequestException("At least one restaurant field must be proposed");
         }
         RestaurantEdit edit = new RestaurantEdit();
@@ -159,6 +163,7 @@ public class KhaaoDexService {
         edit.setProposedLongitude(request.longitude());
         edit.setProposedCuisine(blankToNull(request.cuisine()));
         edit.setProposedPriceCategory(request.priceCategory());
+        edit.setProposedCategories(request.categories() == null ? null : Set.copyOf(request.categories()));
         edit.setProposedGooglePlaceId(blankToNull(request.googlePlaceId()));
         edit.setStatus(RestaurantEditStatus.PENDING);
         return editView(edits.save(edit));
@@ -194,6 +199,7 @@ public class KhaaoDexService {
             if (edit.getProposedLongitude() != null) r.setLongitude(edit.getProposedLongitude());
             if (edit.getProposedCuisine() != null) r.setCuisine(edit.getProposedCuisine());
             if (edit.getProposedPriceCategory() != null) r.setPriceCategory(edit.getProposedPriceCategory());
+            if (edit.getProposedCategories() != null) r.setCategories(Set.copyOf(edit.getProposedCategories()));
             if (edit.getProposedGooglePlaceId() != null) r.setGooglePlaceId(edit.getProposedGooglePlaceId());
             restaurants.save(r);
         }
@@ -224,7 +230,7 @@ public class KhaaoDexService {
                 .mapToInt(Integer::intValue).average().orElse(0);
         RelationshipView relation = user == null ? null : relationships.findByUserAndRestaurant(user, r).map(this::relationshipView).orElse(null);
         return new RestaurantView(r.getId(), r.getName(), r.getAddress(), r.getLatitude(), r.getLongitude(), r.getCuisine(),
-                r.getPriceCategory(), r.getGooglePlaceId(), r.getStatus(), relation, average, restaurantReviews.size());
+                r.getPriceCategory(), r.getGooglePlaceId(), r.getCategories(), r.getStatus(), relation, average, restaurantReviews.size());
     }
 
     private RelationshipView relationshipView(UserRestaurant relation) {
@@ -240,7 +246,7 @@ public class KhaaoDexService {
 
     private RestaurantEditView editView(RestaurantEdit edit) {
         RestaurantEditRequest proposed = new RestaurantEditRequest(edit.getProposedName(), edit.getProposedAddress(), edit.getProposedLatitude(),
-                edit.getProposedLongitude(), edit.getProposedCuisine(), edit.getProposedPriceCategory(), edit.getProposedGooglePlaceId());
+                edit.getProposedLongitude(), edit.getProposedCuisine(), edit.getProposedPriceCategory(), edit.getProposedCategories(), edit.getProposedGooglePlaceId());
         return new RestaurantEditView(edit.getId(), edit.getRestaurant().getId(), edit.getSubmittedBy().getId(), edit.getStatus(), proposed,
                 edit.getCreatedAt(), edit.getReviewedBy() == null ? null : edit.getReviewedBy().getId(), edit.getReviewedAt(), edit.getModerationNote());
     }

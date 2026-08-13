@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "khaao_restaurants")
@@ -29,6 +31,12 @@ public class Restaurant {
 
     @Column(length = 100)
     private String cuisine;
+
+    @ElementCollection
+    @CollectionTable(name = "khaao_restaurant_categories", joinColumns = @JoinColumn(name = "restaurant_id"))
+    @Column(name = "category")
+    @Enumerated(EnumType.STRING)
+    private Set<RestaurantCategory> categories = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private RestaurantPriceCategory priceCategory;

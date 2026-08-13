@@ -1,0 +1,7 @@
+package com.example.demo.entity;
+
+public enum RestaurantCategory {
+    CAFE, PIZZA_BURGERS, FINE_DINING, NORTH_INDIAN, SOUTH_INDIAN,
+    CHAAT, SWEETS_BAKERY, DESSERT_PLACE, STREET_FOOD, FAST_FOOD,
+    CHINESE, CONTINENTAL
+}

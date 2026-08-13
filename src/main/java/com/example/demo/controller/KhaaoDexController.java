@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.khaao.KhaaoDexDtos.*;
 import com.example.demo.entity.RestaurantPriceCategory;
+import com.example.demo.entity.RestaurantCategory;
 import com.example.demo.entity.User;
 import com.example.demo.service.KhaaoDexService;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/khaao-dex")
@@ -25,11 +27,12 @@ public class KhaaoDexController {
             @AuthenticationPrincipal User user,
             @RequestParam(required = false) String cuisine,
             @RequestParam(required = false) RestaurantPriceCategory priceCategory,
+            @RequestParam(required = false) Set<RestaurantCategory> categories,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
             @RequestParam(required = false) Double radiusKm,
             @RequestParam(required = false) Boolean visited) {
-        return service.discover(user, cuisine, priceCategory, latitude, longitude, radiusKm, visited);
+        return service.discover(user, cuisine, priceCategory, categories, latitude, longitude, radiusKm, visited);
     }
 
     @GetMapping("/restaurants/{id}")

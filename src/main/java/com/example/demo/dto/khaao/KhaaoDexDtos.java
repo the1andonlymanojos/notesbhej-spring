@@ -1,6 +1,7 @@
 package com.example.demo.dto.khaao;
 
 import com.example.demo.entity.RestaurantEditStatus;
+import com.example.demo.entity.RestaurantCategory;
 import com.example.demo.entity.RestaurantPriceCategory;
 import com.example.demo.entity.RestaurantStatus;
 import jakarta.validation.Valid;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 public final class KhaaoDexDtos {
     private KhaaoDexDtos() {}
@@ -19,6 +21,7 @@ public final class KhaaoDexDtos {
             @NotNull @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
             @Size(max = 100) String cuisine,
             RestaurantPriceCategory priceCategory,
+            Set<RestaurantCategory> categories,
             @Size(max = 200) String googlePlaceId) {}
 
     public record RelationshipRequest(@NotNull Boolean visited) {}
@@ -38,6 +41,7 @@ public final class KhaaoDexDtos {
             @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
             @Size(max = 100) String cuisine,
             RestaurantPriceCategory priceCategory,
+            Set<RestaurantCategory> categories,
             @Size(max = 200) String googlePlaceId) {}
 
     public record ModerationRequest(@Size(max = 1000) String note) {}
@@ -52,6 +56,7 @@ public final class KhaaoDexDtos {
     public record RestaurantView(Long id, String name, String address, Double latitude,
                                  Double longitude, String cuisine,
                                  RestaurantPriceCategory priceCategory, String googlePlaceId,
+                                 Set<RestaurantCategory> categories,
                                  RestaurantStatus status, RelationshipView relationship,
                                  Double averageRating, long reviewCount) {}
 
