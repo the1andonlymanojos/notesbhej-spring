@@ -40,7 +40,13 @@ public class SecurityConfig {
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://mshiv.net", "https://test.com", "https://www.mshiv.net"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "https://mshiv.net",
+                "https://test.com",
+                "https://www.mshiv.net",
+                "https://notesbhej.mshiv.net",
+                "https://notesbhej-stage.mshiv.net"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET","POST"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

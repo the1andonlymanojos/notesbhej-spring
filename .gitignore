@@ -42,6 +42,8 @@ lib/
 .m2/
 docker-compose.yml
 logs/
+k8s/notesbhej-secrets.yaml
+k8s-stage/secrets.yaml
 src/main/resources/
 
 testDonw.py

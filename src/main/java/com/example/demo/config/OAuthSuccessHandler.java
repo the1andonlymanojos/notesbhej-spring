@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.context.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,9 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
     private final UserRepository userRepo;
+
+    @Value("${APP_FRONTEND_URL:https://notesbhej.mshiv.net}")
+    private String frontend;
 
     public OAuthSuccessHandler(JwtService jwtService, UserRepository userRepo) {
         this.jwtService = jwtService;
@@ -38,9 +42,6 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         String hd = oauthUser.getAttribute("hd");
         System.out.println("HD"+ hd);
         System.out.println("email: "+email);
-        String frontend = "https://notesbhej.mshiv.net";
-        //String frontend = "http://localhost:3000";
-
         User user = userRepo.findByGoogleId(googleId)
                 .orElseGet(() -> {
 

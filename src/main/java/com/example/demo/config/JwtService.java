@@ -6,6 +6,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
@@ -16,7 +17,8 @@ public class JwtService {
 
     private final UserRepository repo;
 
-    private final String secret = "super-secret-key-super-secret-key-super-secret-key";
+    @Value("${JWT_SECRET:super-secret-key-super-secret-key-super-secret-key}")
+    private String secret;
 
     public JwtService(UserRepository repo) {
         this.repo = repo;
@@ -50,4 +52,3 @@ public class JwtService {
         return repo.findById(userId).orElse(null);
     }
 }
-

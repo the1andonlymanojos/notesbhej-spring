@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,9 @@ public class UserController {
 
 
     private final UserRepository repo;
+
+    @Value("${APP_ENV:unknown}")
+    private String environment;
 
     public UserController(UserRepository repo) {
         this.repo = repo;
@@ -38,6 +42,7 @@ public class UserController {
     public Object health() {
         return java.util.Map.of(
                 "status", "UP",
+                "environment", environment,
                 "timestamp", java.time.Instant.now().toString()
         );
     }
