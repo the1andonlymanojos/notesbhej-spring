@@ -45,9 +45,11 @@ public class SecurityConfig {
                 "https://test.com",
                 "https://www.mshiv.net",
                 "https://notesbhej.mshiv.net",
-                "https://notesbhej-stage.mshiv.net"
+                "https://notesbhej-stage.mshiv.net",
+                "https://khao-dex.mshiv.net"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

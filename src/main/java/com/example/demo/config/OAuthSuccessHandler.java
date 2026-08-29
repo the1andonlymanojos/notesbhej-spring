@@ -6,15 +6,15 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.springframework.context.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Instant;
+import java.time.Duration;
 import java.util.Optional;
 
 
@@ -26,6 +26,10 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     @Value("${APP_FRONTEND_URL:https://notesbhej.mshiv.net}")
     private String frontend;
+
+    /** Set to ".mshiv.net" to share the session across every *.mshiv.net project. Empty = host-only. */
+    @Value("${APP_COOKIE_DOMAIN:}")
+    private String cookieDomain;
 
     public OAuthSuccessHandler(JwtService jwtService, UserRepository userRepo) {
         this.jwtService = jwtService;
@@ -80,12 +84,14 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }
         String token = jwtService.generateToken(user);
 
-        System.out.println("token"+token);
-        Cookie cookie = new Cookie("access_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // true later
-        cookie.setPath("/");
-        cookie.setMaxAge(3600*30*24);
+        ResponseCookie.ResponseCookieBuilder cb = ResponseCookie.from("access_token", token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofDays(30))
+                .sameSite("None");
+        if (cookieDomain != null && !cookieDomain.isBlank()) cb.domain(cookieDomain);
+        ResponseCookie cookie = cb.build();
 
         String redirect = null;
 
@@ -98,22 +104,34 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }
         System.out.println("redirect param = " + redirect);
 
-         if (redirect == null) {
+        if (redirect == null) {
             redirect = frontend;
-        }
-        else if (redirect.startsWith("/")) {
+        } else if (redirect.startsWith("/")) {
             redirect = frontend + redirect;
-        }
-        else if (!redirect.startsWith("http")) {
+        } else if (!isAllowedRedirect(redirect)) {
+            // Open-redirect guard: only bounce back to our own domains.
             redirect = frontend;
         }
 
         request.getSession().removeAttribute("OAUTH_REDIRECT");
 
-        response.addCookie(cookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         response.sendRedirect(redirect);
 
 
+    }
+
+    /** Allow only https redirects to mshiv.net and its subdomains. */
+    private static boolean isAllowedRedirect(String url) {
+        try {
+            java.net.URI uri = java.net.URI.create(url);
+            String host = uri.getHost();
+            return "https".equalsIgnoreCase(uri.getScheme())
+                    && host != null
+                    && (host.equals("mshiv.net") || host.endsWith(".mshiv.net"));
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
 
