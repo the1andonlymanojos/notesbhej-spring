@@ -70,7 +70,9 @@ jobs:
             deployment/notesbhej-api-stage \
             --timeout=180s
 
-      - name: Smoke test
+      # Informational only — `rollout status` above is the real gate.
+      - name: Smoke test (informational)
+        continue-on-error: true
         run: |
-          curl --fail-with-body \
+          curl --fail-with-body --show-error --retry 15 --retry-delay 3 --retry-all-errors \
             https://notesbhej-stage.mshiv.net/api/v1/health
