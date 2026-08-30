@@ -7,21 +7,21 @@ import jakarta.servlet.http.*;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final AuthCookies authCookies;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, AuthCookies authCookies) {
         this.jwtService = jwtService;
+        this.authCookies = authCookies;
     }
 
     @Override
@@ -32,50 +32,47 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         Cookie[] cookies = request.getCookies();
 
-        String token = null;
+        if (cookies != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            boolean sawToken = false;
+            User user = null;
 
-        if (cookies != null) {
+            // A domain migration can leave a host-only and a domain-scoped
+            // access_token side by side. Try each; the first that validates wins.
             for (Cookie cookie : cookies) {
-                if ("access_token".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
+                if (!AuthCookies.NAME.equals(cookie.getName())) continue;
+                sawToken = true;
+                String value = cookie.getValue();
+                if (value == null || value.isBlank()) continue;
+                try {
+                    User candidate = jwtService.validate(value);
+                    if (candidate != null) {
+                        user = candidate;
+                        break;
+                    }
+                } catch (Exception ignored) {
+                    // try the next cookie
                 }
-
             }
-        }
-        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
-                User user = jwtService.validate(token);
 
-                if (user != null) {
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    user, null, user.getAuthorities());
+            if (user != null) {
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
 
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                    // 👇 Ensure demo_id cookie exists
-                    boolean hasDemoId = false;
-
-                    for (Cookie cookie : cookies) {
-                        if ("demo_id".equals(cookie.getName())) {
-                            hasDemoId = true;
-                            break;
-                        }
+                boolean hasDemoId = false;
+                for (Cookie cookie : cookies) {
+                    if ("demo_id".equals(cookie.getName())) {
+                        hasDemoId = true;
+                        break;
                     }
-                    if (!hasDemoId) {
-                        Cookie demoCookie = getDemoCookie(user);
-
-                        response.addCookie(demoCookie);
-                    }
-
-
-
-                } else {
-                    clearCookie(response);
                 }
-
-            } catch (Exception e) {
-                clearCookie(response);
+                if (!hasDemoId) {
+                    response.addCookie(getDemoCookie(user));
+                }
+            } else if (sawToken) {
+                // Had an access_token cookie but nothing validated — clear it.
+                authCookies.clear(response);
             }
         }
         filterChain.doFilter(request, response);
@@ -89,14 +86,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         demoCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
         //demoCookie.setDomain(".mshiv.net");
         return demoCookie;
-    }
-
-    private void clearCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("access_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // keep consistent with how you set it
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // delete immediately
-        response.addCookie(cookie);
     }
 }

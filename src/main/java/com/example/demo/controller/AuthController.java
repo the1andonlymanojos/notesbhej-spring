@@ -1,10 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.config.AuthCookies;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -13,9 +11,11 @@ import java.io.IOException;
 @RequestMapping("/auth")
 public class AuthController {
 
-    /** Must match OAuthSuccessHandler so logout clears the same cookie. */
-    @Value("${APP_COOKIE_DOMAIN:}")
-    private String cookieDomain;
+    private final AuthCookies authCookies;
+
+    public AuthController(AuthCookies authCookies) {
+        this.authCookies = authCookies;
+    }
 
     @GetMapping("/google")
     public void google(
@@ -36,15 +36,6 @@ public class AuthController {
 
     @PostMapping("/logout")
     public void logout(HttpServletResponse response) {
-
-        ResponseCookie.ResponseCookieBuilder cb = ResponseCookie.from("access_token", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .sameSite("None");
-        if (cookieDomain != null && !cookieDomain.isBlank()) cb.domain(cookieDomain);
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cb.build().toString());
+        authCookies.clear(response);
     }
 }

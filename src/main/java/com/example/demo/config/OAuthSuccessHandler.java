@@ -7,14 +7,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Optional;
 
 
@@ -23,17 +20,15 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
     private final UserRepository userRepo;
+    private final AuthCookies authCookies;
 
     @Value("${APP_FRONTEND_URL:https://notesbhej.mshiv.net}")
     private String frontend;
 
-    /** Set to ".mshiv.net" to share the session across every *.mshiv.net project. Empty = host-only. */
-    @Value("${APP_COOKIE_DOMAIN:}")
-    private String cookieDomain;
-
-    public OAuthSuccessHandler(JwtService jwtService, UserRepository userRepo) {
+    public OAuthSuccessHandler(JwtService jwtService, UserRepository userRepo, AuthCookies authCookies) {
         this.jwtService = jwtService;
         this.userRepo = userRepo;
+        this.authCookies = authCookies;
     }
 
     @Override
@@ -84,15 +79,6 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         }
         String token = jwtService.generateToken(user);
 
-        ResponseCookie.ResponseCookieBuilder cb = ResponseCookie.from("access_token", token)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(Duration.ofDays(30))
-                .sameSite("None");
-        if (cookieDomain != null && !cookieDomain.isBlank()) cb.domain(cookieDomain);
-        ResponseCookie cookie = cb.build();
-
         String redirect = null;
 
         if (request.getCookies() != null) {
@@ -115,7 +101,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
         request.getSession().removeAttribute("OAUTH_REDIRECT");
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        authCookies.write(response, token);
         response.sendRedirect(redirect);
 
 
