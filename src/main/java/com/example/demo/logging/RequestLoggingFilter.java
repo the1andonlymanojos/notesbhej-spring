@@ -22,6 +22,12 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RequestLoggingFilter.class);
 
+    // k8s liveness/readiness probes hit these every few seconds; logging them drowns real traffic
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/actuator");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -32,7 +38,6 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
         String method = request.getMethod();
         String path = request.getRequestURI();
-        System.out.println("REQUEST START " + method + " " + path);
         try {
             filterChain.doFilter(request, response);
         } finally {
@@ -43,7 +48,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             String ip = MDC.get("ip");     // from your earlier filter
             String user = MDC.get("user"); // from auth filter
 
-            log.info("request",
+            // placeholders render kv() as key=value in plain-text logs, and as JSON fields with LogstashEncoder
+            log.info("request {} {} {} {} {} {}",
                     kv("method", method),
                     kv("path", path),
                     kv("status", status),
